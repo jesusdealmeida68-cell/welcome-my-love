@@ -1,80 +1,9 @@
 import { ArrowRight, Heart } from "lucide-react";
+import { LoveMenu } from "@/components/LoveMenu";
+import { Polaroid } from "@/components/Polaroid";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type Pos = { x: number; y: number };
-
-function Polaroid({
-  src,
-  alt,
-  name,
-  tilt,
-}: {
-  src: string;
-  alt: string;
-  name: string;
-  tilt: string;
-}) {
-  return (
-    <figure
-      className={`relative w-[min(40vw,10.5rem)] bg-polaroid p-2 pb-9 shadow-polaroid ${tilt}`}
-    >
-      <img
-        src={src}
-        alt={alt}
-        width={720}
-        height={960}
-        loading="eager"
-        className="aspect-[4/5] w-full object-cover"
-      />
-      <figcaption className="font-hand absolute inset-x-0 bottom-1.5 text-center text-2xl font-bold leading-none text-foreground/75">
-        {name}
-      </figcaption>
-    </figure>
-  );
-}
-
-const POEM: string[][] = [
-  [
-    "Eu podia escrever um poema bonito,",
-    "daqueles que parecem saídos de um livro...",
-    "mas, sinceramente,",
-    "a culpa é tua. 😂",
-  ],
-  [
-    "Porque quando penso em ti,",
-    "começo a sorrir sem perceber,",
-    "esqueço o que ia escrever",
-    "e fico aqui... a pensar em ti. 🤦🏽‍♂️❤️",
-  ],
-  [
-    "Tu tens esse jeito estranho",
-    "de aparecer nos meus pensamentos",
-    "sem sequer bater à porta.",
-    "E o pior?",
-    "Eu nem quero que vás embora. 😌",
-  ],
-  [
-    "Gosto do teu sorriso,",
-    "gosto do teu jeito,",
-    "gosto das pequenas coisas em ti",
-    "que talvez nem saibas que eu reparo.",
-  ],
-  ["E olha que eu tentei ser sério", "enquanto escrevia isto...", "mas não dá. 😂"],
-  [
-    "Porque falar de ti",
-    "é tipo tentar esconder um sorriso:",
-    "quanto mais eu tento,",
-    "mais óbvio fica.",
-  ],
-  [
-    "Então pronto...",
-    "não vou complicar.",
-    "Gosto de ti. ❤️",
-    "Talvez um bocadinho mais",
-    "do que eu deveria admitir. 👀",
-  ],
-  ["Mas fica tranquila...", "este poema não conta para ninguém. 🤫😂❤️"],
-];
 
 const FACES = ["😏", "😎", "🙈", "😅", "🤭", "🫣"];
 
@@ -95,7 +24,7 @@ export function WhoIsCuterModal({
   onContinue?: () => void;
 }) {
   const [note, setNote] = useState(false);
-  const [poemStage, setPoemStage] = useState<"intro" | "poem" | null>(null);
+  const [menu, setMenu] = useState(false);
   const [pos, setPos] = useState<Pos>({ x: 0, y: 0 });
   const [tilt, setTilt] = useState(0);
   const [fleeing, setFleeing] = useState(false);
@@ -162,6 +91,8 @@ export function WhoIsCuterModal({
 
   const tease = dodges > 0;
 
+  if (menu) return <LoveMenu />;
+
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-center overflow-hidden bg-foreground/45 px-4 backdrop-blur-sm"
@@ -175,75 +106,7 @@ export function WhoIsCuterModal({
           aria-hidden="true"
         />
 
-        {poemStage === "intro" ? (
-          <div className="gate-in flex w-full flex-col items-center px-2 pb-1 pt-3">
-            <div
-              className="grid size-16 place-items-center rounded-full bg-primary/10 text-3xl"
-              aria-hidden="true"
-            >
-              📜
-            </div>
-            <h2
-              id="cuter-title"
-              className="font-hand mt-5 text-[clamp(2.1rem,6.4dvh,2.9rem)] font-bold leading-[1.05] text-primary"
-            >
-              É só um poema.
-            </h2>
-            <p className="mt-3 max-w-[16rem] text-[0.95rem] leading-relaxed text-foreground/75">
-              Não vais te apaixonar, tá, meu bem? 😌
-            </p>
-            <button
-              type="button"
-              className="gate-key mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3 text-sm font-bold tracking-[0.18em]"
-              onClick={() => setPoemStage("poem")}
-            >
-              LER O POEMA
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </button>
-          </div>
-        ) : poemStage === "poem" ? (
-          <article
-            className="flex max-h-[calc(100dvh-4rem)] w-full flex-col items-center overflow-y-auto px-3 pb-2 pt-2"
-            aria-labelledby="cuter-title"
-          >
-            <h2
-              id="cuter-title"
-              className="font-hand gate-in text-[clamp(2rem,6dvh,2.6rem)] font-bold leading-none text-primary"
-            >
-              Só um poema
-            </h2>
-            <span className="mt-3 h-px w-14 bg-primary/35" aria-hidden="true" />
-
-            <div className="mt-5 space-y-5">
-              {(() => {
-                let index = 0;
-                return POEM.map((stanza, si) => (
-                  <p key={si} className="font-hand text-[1.35rem] leading-snug text-foreground/85">
-                    {stanza.map((line) => {
-                      const delay = 500 + index * 320;
-                      index += 1;
-                      return (
-                        <span
-                          key={line}
-                          className="gate-in block"
-                          style={{ animationDelay: `${delay}ms` }}
-                        >
-                          {line}
-                        </span>
-                      );
-                    })}
-                  </p>
-                ));
-              })()}
-            </div>
-
-            <Heart
-              className="gate-in mt-6 size-5 fill-primary text-primary"
-              style={{ animationDelay: `${500 + POEM.flat().length * 320 + 300}ms` }}
-              aria-hidden="true"
-            />
-          </article>
-        ) : !chosen ? (
+        {!chosen ? (
           <>
             <h2
               id="cuter-title"
@@ -355,7 +218,7 @@ export function WhoIsCuterModal({
               type="button"
               className="gate-key relative mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3 text-sm font-bold tracking-[0.18em]"
               onClick={() => {
-                setPoemStage("intro");
+                setMenu(true);
                 onContinue?.();
               }}
             >
