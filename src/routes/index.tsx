@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Delete, Heart, LockKeyhole } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { WhoIsCuterModal } from "@/components/WhoIsCuterModal";
 import { unlockSite } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/")({
@@ -35,6 +36,7 @@ function Index() {
   const [shakeKey, setShakeKey] = useState(0);
   const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearing = useRef(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -76,6 +78,13 @@ function Index() {
       setPassword("");
     }, 450);
   }, [password, status, unlock]);
+
+  // depois de confirmar a senha, abre o modal "quem é o mais fofo?"
+  useEffect(() => {
+    if (status !== "success") return;
+    const timer = setTimeout(() => setShowModal(true), 900);
+    return () => clearTimeout(timer);
+  }, [status]);
 
   // entra sozinho assim que o último número é digitado
   useEffect(() => {
@@ -195,6 +204,7 @@ function Index() {
           </div>
         </section>
       </div>
+      {showModal && <WhoIsCuterModal />}
     </main>
   );
 }
