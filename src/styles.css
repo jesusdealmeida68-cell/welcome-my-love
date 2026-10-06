@@ -250,24 +250,9 @@
     100% { opacity: 0; transform: translateY(-120px) scale(1.1) rotate(12deg); }
   }
 
-  .splash-pulse { animation: splash-pulse 1.6s ease-in-out infinite; }
-  .splash-ring { animation: splash-ring 1.6s ease-out infinite; }
-  .splash-spark { opacity: 0; animation: splash-spark 2.2s ease-in-out infinite; }
-  .splash-text { animation: gate-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-  .splash-bar { width: 0; animation: splash-bar linear forwards; }
+  .splash-fade { animation: gate-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .splash-bar { width: 0; animation: splash-bar ease-in-out forwards; }
 
-  @keyframes splash-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-  }
-  @keyframes splash-ring {
-    0% { transform: scale(0.9); opacity: 0.8; }
-    100% { transform: scale(1.6); opacity: 0; }
-  }
-  @keyframes splash-spark {
-    0%, 100% { opacity: 0; transform: translateY(8px) scale(0.8); }
-    50% { opacity: 1; transform: translateY(-8px) scale(1.1); }
-  }
   @keyframes splash-bar {
     from { width: 0; }
     to { width: 100%; }
@@ -285,8 +270,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .gate-in, .gate-shake, .heart-float, .splash-pulse, .splash-ring, .splash-spark, .splash-text { animation: none; }
-    .splash-spark { opacity: 0.7; }
+    .gate-in, .gate-shake, .heart-float, .splash-fade { animation: none; }
     .splash-bar { width: 100%; animation: none; }
     .gate-key { transition: none; }
   }
