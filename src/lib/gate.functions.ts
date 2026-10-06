@@ -53,7 +53,8 @@ export const unlockSite = createServerFn({ method: "POST" })
 
     const session = await useSession<GateSession>(getSessionConfig());
     await session.update({ unlocked: true });
-    return { ok: true as const };
+    const music = await import("@/assets/turning-page-piano.m4a.asset.json");
+    return { ok: true as const, music: music.default.url };
   });
 
 export const getLoveLetter = createServerFn({ method: "GET" }).handler(async () => {

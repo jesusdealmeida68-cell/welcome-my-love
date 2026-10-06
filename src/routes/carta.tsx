@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Heart, Music, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getLoveLetter } from "@/lib/gate.functions";
+import { getMusic } from "@/lib/music";
 
 export const Route = createFileRoute("/carta")({
   loader: () => getLoveLetter(),
@@ -19,53 +20,41 @@ export const Route = createFileRoute("/carta")({
 
 function LoveLetter() {
   const { poem, photos, music } = Route.useLoaderData();
-  const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    const audio = audioRef.current;
+    const audio = getMusic(music);
     if (!audio) return;
-    audio.volume = 0.6;
-    // Tenta tocar ao abrir a carta; se o navegador bloquear, o botão fica disponível.
-    audio.play().catch(() => setPlaying(false));
-    return () => audio.pause();
-  }, []);
+    const onPlay = () => setPlaying(true);
+    const onPause = () => setPlaying(false);
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
+    setPlaying(!audio.paused);
+    // Já deve estar a tocar desde o clique em "LER"; se não, tenta agora
+    // e, se o navegador bloquear, toca no primeiro toque.
+    if (audio.paused) {
+      audio.play().catch(() => {
+        const start = () => void audio.play().catch(() => {});
+        window.addEventListener("pointerdown", start, { once: true });
+        window.addEventListener("keydown", start, { once: true });
+      });
+    }
+    return () => {
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
+      audio.pause();
+    };
+  }, [music]);
 
   const toggleMusic = () => {
-    const audio = audioRef.current;
+    const audio = getMusic();
     if (!audio) return;
-    if (audio.paused) audio.play().catch(() => setPlaying(false));
+    if (audio.paused) void audio.play().catch(() => {});
     else audio.pause();
   };
 
   return (
     <main className="letter-scene min-h-dvh px-5 pb-20 pt-6">
-      <audio
-        ref={audioRef}
-        src={music}
-        loop
-        preload="auto"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-      />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={toggleMusic}
-        className="fixed right-4 top-4 z-50 text-letter-gold"
-        aria-label={playing ? "Pausar música" : "Tocar música"}
-      >
-        {playing ? <Music /> : <VolumeX />}
-      </Button>
-      <audio
-        ref={audioRef}
-        src={music}
-        loop
-        preload="auto"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-      />
       <Button
         type="button"
         variant="ghost"

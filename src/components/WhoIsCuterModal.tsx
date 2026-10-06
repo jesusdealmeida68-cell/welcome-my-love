@@ -3,6 +3,7 @@ import { useRouter } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Polaroid } from "@/components/Polaroid";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { playMusic } from "@/lib/music";
 
 type Pos = { x: number; y: number };
 
@@ -218,6 +219,7 @@ export function WhoIsCuterModal({
               variant="ghost"
               className="gate-key relative mt-7 h-12 gap-2 rounded-2xl px-7 text-sm font-bold"
               onClick={() => {
+                void playMusic();
                 void router.navigate({ to: "/carta" });
                 onContinue?.();
               }}

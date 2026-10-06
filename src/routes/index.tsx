@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { SplashScreen } from "@/components/SplashScreen";
 import { WhoIsCuterModal } from "@/components/WhoIsCuterModal";
 import { unlockSite } from "@/lib/gate.functions";
+import { preloadMusic } from "@/lib/music";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -66,6 +67,7 @@ function Index() {
     try {
       const result = await unlock({ data: { password } });
       if (result.ok) {
+        preloadMusic(result.music);
         setStatus("success");
         return;
       }
