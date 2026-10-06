@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Heart } from "lucide-react";
+import { ArrowLeft, Heart, Music, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getLoveLetter } from "@/lib/gate.functions";
 
@@ -17,9 +18,65 @@ export const Route = createFileRoute("/carta")({
 });
 
 function LoveLetter() {
-  const { poem, photos } = Route.useLoaderData();
+  const { poem, photos, music } = Route.useLoaderData();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = 0.6;
+    // Tenta tocar ao abrir a carta; se o navegador bloquear, o botão fica disponível.
+    audio.play().catch(() => setPlaying(false));
+    return () => audio.pause();
+  }, []);
+
+  const toggleMusic = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) audio.play().catch(() => setPlaying(false));
+    else audio.pause();
+  };
+
   return (
     <main className="letter-scene min-h-dvh px-5 pb-20 pt-6">
+      <audio
+        ref={audioRef}
+        src={music}
+        loop
+        preload="auto"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={toggleMusic}
+        className="fixed right-4 top-4 z-50 text-letter-gold"
+        aria-label={playing ? "Pausar música" : "Tocar música"}
+      >
+        {playing ? <Music /> : <VolumeX />}
+      </Button>
+      <audio
+        ref={audioRef}
+        src={music}
+        loop
+        preload="auto"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={toggleMusic}
+        className="fixed right-4 top-4 z-50 rounded-full bg-black/20 text-letter-gold backdrop-blur"
+        aria-label={playing ? "Pausar música" : "Tocar música"}
+        aria-pressed={playing}
+      >
+        {playing ? <Music className="animate-pulse" /> : <VolumeX />}
+      </Button>
       <nav className="mx-auto max-w-4xl">
         <Button asChild variant="ghost" size="icon" className="text-letter-gold" aria-label="Voltar">
           <Link to="/"><ArrowLeft /></Link>

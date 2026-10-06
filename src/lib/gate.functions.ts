@@ -59,13 +59,15 @@ export const unlockSite = createServerFn({ method: "POST" })
 export const getLoveLetter = createServerFn({ method: "GET" }).handler(async () => {
   const session = await useSession<GateSession>(getSessionConfig());
   if (!session.data.unlocked) throw redirect({ to: "/" });
-  const [portrait, smile, garden] = await Promise.all([
+  const [portrait, smile, garden, music] = await Promise.all([
     import("@/assets/helena-retrato.jpg.asset.json"),
     import("@/assets/helena-sorriso.jpg.asset.json"),
     import("@/assets/helena-jardim.jpg.asset.json"),
+    import("@/assets/turning-page-piano.m4a.asset.json"),
   ]);
   return {
     photos: [portrait.default.url, smile.default.url, garden.default.url],
+    music: music.default.url,
     poem: `No dia que te conheci,
 o mundo não fez silêncio.
 O sol nasceu,
