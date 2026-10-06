@@ -1,4 +1,3 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 import { z } from "zod";
@@ -26,10 +25,19 @@ function getSessionConfig() {
   };
 }
 
-function passwordsMatch(input: string, expected: string) {
-  const inputDigest = createHash("sha256").update(input, "utf8").digest();
-  const expectedDigest = createHash("sha256").update(expected, "utf8").digest();
-  return timingSafeEqual(inputDigest, expectedDigest);
+async function passwordsMatch(input: string, expected: string) {
+  const encoder = new TextEncoder();
+  const [inputDigest, expectedDigest] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(input)),
+    crypto.subtle.digest("SHA-256", encoder.encode(expected)),
+  ]);
+  const inputBytes = new Uint8Array(inputDigest);
+  const expectedBytes = new Uint8Array(expectedDigest);
+  let difference = 0;
+  for (let index = 0; index < inputBytes.length; index += 1) {
+    difference |= inputBytes[index] ^ expectedBytes[index];
+  }
+  return difference === 0;
 }
 
 export const unlockSite = createServerFn({ method: "POST" })
@@ -38,7 +46,7 @@ export const unlockSite = createServerFn({ method: "POST" })
     const expected = process.env["SITE_PASSWORD"];
     if (!expected) throw new Error("SITE_PASSWORD is not configured");
 
-    if (!passwordsMatch(data.password, expected)) {
+    if (!(await passwordsMatch(data.password, expected))) {
       return { ok: false as const };
     }
 
