@@ -72,34 +72,34 @@
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.975 0.018 250);
-  --foreground: oklch(0.27 0.035 250);
+  --background: oklch(0.975 0.018 355);
+  --foreground: oklch(0.27 0.035 355);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.5 0.16 258);
-  --primary-foreground: oklch(0.99 0.005 250);
+  --primary: oklch(0.57 0.13 357);
+  --primary-foreground: oklch(0.99 0.005 355);
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.945 0.025 250);
-  --muted-foreground: oklch(0.49 0.035 250);
+  --muted: oklch(0.945 0.025 355);
+  --muted-foreground: oklch(0.49 0.035 355);
   --accent: oklch(0.968 0.007 247.896);
   --accent-foreground: oklch(0.208 0.042 265.755);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.88 0.035 250);
-  --input: oklch(0.84 0.045 250);
-  --ring: oklch(0.64 0.1 250);
+  --border: oklch(0.88 0.035 355);
+  --input: oklch(0.84 0.045 355);
+  --ring: oklch(0.64 0.1 357);
   --polaroid: oklch(0.995 0.004 90);
-  --photo-muted: oklch(0.93 0.025 250);
+  --photo-muted: oklch(0.93 0.025 355);
   --input-surface: oklch(0.995 0.006 355 / 80%);
   --success: oklch(0.5 0.105 150);
-  --gate-top: oklch(0.95 0.035 245);
-  --gate-bottom: oklch(0.78 0.13 240);
-  --gate-key: oklch(0.8 0.09 262);
-  --gate-key-edge: oklch(0.66 0.13 262);
-  --gate-pill: oklch(0.38 0.03 255);
+  --gate-top: oklch(0.975 0.022 355);
+  --gate-bottom: oklch(0.8 0.115 358);
+  --gate-key: oklch(0.86 0.075 355);
+  --gate-key-edge: oklch(0.74 0.1 356);
+  --gate-pill: oklch(0.34 0.05 350);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -188,7 +188,7 @@
   .gate-key {
     background-image: linear-gradient(180deg, color-mix(in oklab, var(--gate-key) 55%, white) 0%, var(--gate-key) 100%);
     border: 1px solid color-mix(in oklab, white 55%, transparent);
-    color: oklch(0.28 0.1 262);
+    color: oklch(0.38 0.09 352);
     box-shadow:
       inset 0 1px 0 color-mix(in oklab, white 75%, transparent),
       0 3px 0 var(--gate-key-edge),

@@ -100,7 +100,7 @@ function Index() {
   return (
     <main className="gate-bg flex h-dvh items-center justify-center overflow-hidden px-6 py-[max(1rem,env(safe-area-inset-top))]">
       <div className="gate-in flex w-full max-w-xs flex-col items-center">
-        <figure className="relative w-[clamp(6.25rem,20dvh,11.5rem)] rotate-[-2.5deg] bg-polaroid p-2.5 pb-[clamp(1.75rem,4.6dvh,2.5rem)] shadow-polaroid">
+        <figure className="relative w-[clamp(7rem,23dvh,13rem)] rotate-[-2.5deg] bg-polaroid p-2.5 pb-[clamp(1.75rem,4.6dvh,2.5rem)] shadow-polaroid">
           <img
             src="/foto.jpg"
             alt="A nossa foto"
