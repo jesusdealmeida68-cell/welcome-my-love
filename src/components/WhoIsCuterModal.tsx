@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const TEASES = [
   "Opa! O Jesus fugiu 🏃💨",
@@ -42,20 +42,28 @@ function Polaroid({
   );
 }
 
+const FACES = ["😏", "😎", "🙈", "😅", "🤭", "🫣"];
+
 export function WhoIsCuterModal({ onChosen }: { onChosen?: () => void }) {
   const [pos, setPos] = useState<Pos>({ x: 0, y: 0 });
+  const [tilt, setTilt] = useState(0);
+  const [fleeing, setFleeing] = useState(false);
   const [dodges, setDodges] = useState(0);
+  const [face, setFace] = useState(0);
   const [chosen, setChosen] = useState(false);
   const jesusRef = useRef<HTMLButtonElement | null>(null);
+  const posRef = useRef<Pos>({ x: 0, y: 0 });
+  const fleeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const dodge = useCallback(() => {
+  const moveRandom = useCallback((minDistance: number) => {
     const el = jesusRef.current;
     if (!el) return;
 
     // posição "natural" do botão (sem o deslocamento atual)
+    const current = posRef.current;
     const rect = el.getBoundingClientRect();
-    const baseLeft = rect.left - pos.x;
-    const baseTop = rect.top - pos.y;
+    const baseLeft = rect.left - current.x;
+    const baseTop = rect.top - current.y;
     const margin = 12;
 
     const minX = margin - baseLeft;
@@ -63,20 +71,39 @@ export function WhoIsCuterModal({ onChosen }: { onChosen?: () => void }) {
     const minY = margin - baseTop;
     const maxY = window.innerHeight - margin - (baseTop + rect.height);
 
-    // tenta várias vezes até sair longe o suficiente do ponto atual
-    let next: Pos = pos;
+    let next = current;
     for (let i = 0; i < 12; i += 1) {
-      const candidate = {
+      next = {
         x: minX + Math.random() * Math.max(0, maxX - minX),
         y: minY + Math.random() * Math.max(0, maxY - minY),
       };
-      next = candidate;
-      if (Math.hypot(candidate.x - pos.x, candidate.y - pos.y) > 110) break;
+      if (Math.hypot(next.x - current.x, next.y - current.y) > minDistance) break;
     }
 
+    posRef.current = next;
     setPos(next);
+    setTilt(Math.round((Math.random() - 0.5) * 36));
+    setFace(Math.floor(Math.random() * FACES.length));
+  }, []);
+
+  // foge de verdade quando ela tenta tocar/clicar
+  const dodge = useCallback(() => {
+    moveRandom(130);
     setDodges((count) => count + 1);
-  }, [pos]);
+    setFleeing(true);
+    if (fleeTimer.current) clearTimeout(fleeTimer.current);
+    fleeTimer.current = setTimeout(() => setFleeing(false), 700);
+  }, [moveRandom]);
+
+  // enquanto isso, anda sozinho pela tela fingindo que não é nada com ele
+  useEffect(() => {
+    if (chosen) return;
+    const interval = setInterval(() => moveRandom(60), 1400);
+    return () => {
+      clearInterval(interval);
+      if (fleeTimer.current) clearTimeout(fleeTimer.current);
+    };
+  }, [chosen, moveRandom]);
 
   const tease = dodges > 0 ? TEASES[(dodges - 1) % TEASES.length] : null;
 
@@ -125,8 +152,13 @@ export function WhoIsCuterModal({ onChosen }: { onChosen?: () => void }) {
               <button
                 ref={jesusRef}
                 type="button"
-                className="gate-key relative z-10 rounded-2xl px-5 py-2.5 text-base font-semibold transition-transform duration-200 ease-out"
-                style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
+                className="gate-key relative z-10 rounded-2xl px-5 py-2.5 text-base font-semibold"
+                style={{
+                  transform: `translate(${pos.x}px, ${pos.y}px) rotate(${tilt}deg) scale(${fleeing ? 1.12 : 1})`,
+                  transition: fleeing
+                    ? "transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1)"
+                    : "transform 1100ms cubic-bezier(0.45, 0, 0.25, 1)",
+                }}
                 onPointerEnter={dodge}
                 onPointerDown={(event) => {
                   event.preventDefault();
@@ -142,12 +174,12 @@ export function WhoIsCuterModal({ onChosen }: { onChosen?: () => void }) {
                   dodge();
                 }}
               >
-                Jesus
+                Jesus {fleeing ? "🏃💨" : FACES[face]}
               </button>
 
               <button
                 type="button"
-                className="gate-key rounded-2xl px-5 py-2.5 text-base font-semibold"
+                className="gate-key relative z-20 rounded-2xl px-5 py-2.5 text-base font-semibold"
                 onClick={() => {
                   setChosen(true);
                   onChosen?.();
