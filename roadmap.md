@@ -1,0 +1,3 @@
+- [x] Replace the activities menu with a direct “Ler” action.
+- [x] Display the supplied poem as a letter with three Polaroid portraits.
+- [x] Verify the protected letter and reading flow.

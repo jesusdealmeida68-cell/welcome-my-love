@@ -1,5 +1,6 @@
 import { ArrowRight, Heart } from "lucide-react";
-import { LoveMenu } from "@/components/LoveMenu";
+import { useRouter } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { Polaroid } from "@/components/Polaroid";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -24,7 +25,7 @@ export function WhoIsCuterModal({
   onContinue?: () => void;
 }) {
   const [note, setNote] = useState(false);
-  const [menu, setMenu] = useState(false);
+  const router = useRouter();
   const [pos, setPos] = useState<Pos>({ x: 0, y: 0 });
   const [tilt, setTilt] = useState(0);
   const [fleeing, setFleeing] = useState(false);
@@ -90,8 +91,6 @@ export function WhoIsCuterModal({
   }, []);
 
   const tease = dodges > 0;
-
-  if (menu) return <LoveMenu />;
 
   return (
     <div
@@ -214,17 +213,18 @@ export function WhoIsCuterModal({
               Não é perfeito, mas cada detalhe foi feito com carinho.
             </p>
 
-            <button
+            <Button
               type="button"
-              className="gate-key relative mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3 text-sm font-bold tracking-[0.18em]"
+              variant="ghost"
+              className="gate-key relative mt-7 h-12 gap-2 rounded-2xl px-7 text-sm font-bold"
               onClick={() => {
-                setMenu(true);
+                void router.navigate({ to: "/carta" });
                 onContinue?.();
               }}
             >
-              CONTINUAR
+              LER
               <ArrowRight className="size-4" aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex flex-col items-center">
