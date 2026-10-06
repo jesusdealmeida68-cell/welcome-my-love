@@ -183,7 +183,7 @@
     border: 1px solid var(--letter-edge);
     transform: rotate(-0.7deg);
   }
-  .letter-fold { position: absolute; top: -35px; left: 7%; right: 7%; height: 90px; background: var(--letter-edge); clip-path: polygon(50% 0, 100% 100%, 0 100%); z-index: -1; }
+  .letter-fold { position: absolute; top: -35px; left: 7%; right: 7%; height: 35px; background: var(--letter-edge); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
   .letter-photos { display: flex; flex-direction: column; gap: 42px; padding-top: 15px; }
   .letter-polaroid { background: var(--polaroid); padding: 9px 9px 12px; box-shadow: var(--letter-shadow); }
   .letter-photo-0 { transform: rotate(7deg); }
