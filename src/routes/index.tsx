@@ -19,8 +19,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const MIN_DOTS = 6;
-const MAX_DIGITS = 12;
+const PASSWORD_LENGTH = 6;
 const DIGIT_ROWS = [
   ["1", "2", "3"],
   ["4", "5", "6"],
@@ -35,6 +34,7 @@ function Index() {
   const [status, setStatus] = useState<Status>("idle");
   const [shakeKey, setShakeKey] = useState(0);
   const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearing = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -43,11 +43,13 @@ function Index() {
   }, []);
 
   const addDigit = useCallback((digit: string) => {
+    if (clearing.current) return;
     setStatus((current) => (current === "loading" || current === "success" ? current : "idle"));
-    setPassword((current) => (current.length >= MAX_DIGITS ? current : current + digit));
+    setPassword((current) => (current.length >= PASSWORD_LENGTH ? current : current + digit));
   }, []);
 
   const removeDigit = useCallback(() => {
+    if (clearing.current) return;
     setStatus((current) => (current === "loading" || current === "success" ? current : "idle"));
     setPassword((current) => current.slice(0, -1));
   }, []);
@@ -68,8 +70,17 @@ function Index() {
 
     setStatus("error");
     setShakeKey((key) => key + 1);
-    clearTimer.current = setTimeout(() => setPassword(""), 450);
+    clearing.current = true;
+    clearTimer.current = setTimeout(() => {
+      clearing.current = false;
+      setPassword("");
+    }, 450);
   }, [password, status, unlock]);
+
+  // entra sozinho assim que o último número é digitado
+  useEffect(() => {
+    if (password.length === PASSWORD_LENGTH && status === "idle") void submit();
+  }, [password, status, submit]);
 
   // teclado físico (computador): números, apagar e Enter
   useEffect(() => {
@@ -84,25 +95,12 @@ function Index() {
   }, [addDigit, removeDigit, submit]);
 
   const locked = status === "loading" || status === "success";
-  const dotCount = Math.max(MIN_DOTS, password.length);
+  const dotCount = PASSWORD_LENGTH;
 
   return (
-    <main className="gate-bg relative min-h-dvh overflow-x-hidden px-6 pb-10 pt-8 text-foreground">
-      <Heart
-        className="absolute left-[9%] top-[6%] size-3 rotate-[-12deg] fill-white/40 text-white/60"
-        aria-hidden="true"
-      />
-      <Heart
-        className="absolute right-[10%] top-[14%] size-2.5 rotate-12 fill-white/35 text-white/55"
-        aria-hidden="true"
-      />
-      <Heart
-        className="absolute bottom-[5%] left-[8%] size-2 fill-white/35 text-white/55"
-        aria-hidden="true"
-      />
-
-      <div className="mx-auto flex w-full max-w-xs flex-col items-center">
-        <figure className="relative w-[10.75rem] rotate-[-3deg] bg-polaroid p-2.5 pb-9 shadow-polaroid sm:w-[12rem]">
+    <main className="gate-bg flex h-dvh items-center justify-center overflow-hidden px-6 py-[max(1rem,env(safe-area-inset-top))]">
+      <div className="gate-in flex w-full max-w-xs flex-col items-center">
+        <figure className="relative w-[clamp(6.25rem,20dvh,11.5rem)] rotate-[-2.5deg] bg-polaroid p-2.5 pb-[clamp(1.75rem,4.6dvh,2.5rem)] shadow-polaroid">
           <img
             src="/foto.jpg"
             alt="A nossa foto"
@@ -111,19 +109,25 @@ function Index() {
             className="aspect-[4/5] w-full object-cover"
           />
           <Heart
-            className="absolute bottom-3 left-1/2 size-4 -translate-x-1/2 fill-transparent text-foreground/60"
+            className="absolute bottom-[clamp(0.55rem,1.4dvh,0.8rem)] left-1/2 size-4 -translate-x-1/2 fill-transparent text-foreground/55"
             aria-hidden="true"
           />
         </figure>
 
-        <section className="mt-6 w-full text-center" aria-labelledby="gate-title">
-          <h1 id="gate-title" className="font-hand text-4xl font-bold leading-none text-primary">
+        <section
+          className="mt-[clamp(0.9rem,3dvh,1.75rem)] w-full text-center"
+          aria-labelledby="gate-title"
+        >
+          <h1
+            id="gate-title"
+            className="font-hand text-[clamp(2rem,5.4dvh,2.5rem)] font-bold leading-none text-primary"
+          >
             Minha Senha
           </h1>
 
           <div
             key={shakeKey}
-            className={`gate-pill mx-auto mt-5 flex h-12 w-full items-center gap-3 rounded-xl px-4 ${shakeKey > 0 && status === "error" ? "gate-shake" : ""}`}
+            className={`gate-pill mx-auto mt-[clamp(0.6rem,2dvh,1.25rem)] flex h-[clamp(2.6rem,6.4dvh,3.1rem)] w-full max-w-[19rem] items-center gap-3 rounded-xl px-4 ${shakeKey > 0 && status === "error" ? "gate-shake" : ""}`}
             role="group"
             aria-label={`Senha: ${password.length} dígitos`}
           >
@@ -139,21 +143,28 @@ function Index() {
             <span className="size-4 shrink-0" aria-hidden="true" />
           </div>
 
-          <div className="min-h-12 pt-2 text-sm" aria-live="polite">
+          <div
+            className="grid h-[clamp(2rem,4.8dvh,2.75rem)] place-items-center text-xs sm:text-sm"
+            aria-live="polite"
+          >
             {status === "error" && (
-              <p className="font-medium text-destructive">
+              <p className="rounded-full bg-white/85 px-3 py-1 text-xs font-semibold text-destructive sm:text-sm shadow-sm">
                 Hmm… acho que você não é a pessoa indicada 🥰
               </p>
             )}
-            {status === "success" && <p className="font-medium text-success">É mesmo você. ♡</p>}
+            {status === "success" && (
+              <p className="rounded-full bg-white/85 px-3 py-1 font-semibold text-success shadow-sm">
+                É mesmo você. ♡
+              </p>
+            )}
           </div>
 
-          <div className="mx-auto mt-1 grid w-full max-w-[17rem] grid-cols-3 gap-x-4 gap-y-3">
+          <div className="mx-auto grid w-full max-w-[19rem] grid-cols-3 gap-x-[clamp(0.75rem,3.4vw,1.1rem)] gap-y-[clamp(0.45rem,1.5dvh,0.85rem)]">
             {DIGIT_ROWS.flat().map((digit) => (
               <button
                 key={digit}
                 type="button"
-                className="gate-key h-11 rounded-xl text-xl font-semibold disabled:opacity-60"
+                className="gate-key h-[clamp(2.9rem,7.6dvh,3.9rem)] rounded-2xl text-2xl font-semibold tabular-nums disabled:opacity-60"
                 onClick={() => addDigit(digit)}
                 disabled={locked}
                 aria-label={digit}
@@ -162,18 +173,10 @@ function Index() {
               </button>
             ))}
 
+            <span aria-hidden="true" />
             <button
               type="button"
-              className="gate-key gate-key-action grid h-11 place-items-center rounded-xl disabled:opacity-60"
-              onClick={() => void submit()}
-              disabled={!password || locked}
-              aria-label="Entrar"
-            >
-              <Heart className="size-5 fill-current" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              className="gate-key h-11 rounded-xl text-xl font-semibold disabled:opacity-60"
+              className="gate-key h-[clamp(2.9rem,7.6dvh,3.9rem)] rounded-2xl text-2xl font-semibold tabular-nums disabled:opacity-60"
               onClick={() => addDigit("0")}
               disabled={locked}
               aria-label="0"
@@ -182,7 +185,7 @@ function Index() {
             </button>
             <button
               type="button"
-              className="gate-key grid h-11 place-items-center rounded-xl disabled:opacity-60"
+              className="gate-key grid h-[clamp(2.9rem,7.6dvh,3.9rem)] place-items-center rounded-2xl disabled:opacity-60"
               onClick={removeDigit}
               disabled={!password || locked}
               aria-label="Apagar"
