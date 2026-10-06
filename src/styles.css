@@ -240,6 +240,16 @@
     to { opacity: 1; transform: none; }
   }
 
+  .heart-float {
+    animation: heart-float var(--dur, 7s) ease-in-out var(--delay, 0s) infinite both;
+  }
+
+  @keyframes heart-float {
+    0% { opacity: 0; transform: translateY(30px) scale(0.7); }
+    20% { opacity: 0.55; }
+    100% { opacity: 0; transform: translateY(-120px) scale(1.1) rotate(12deg); }
+  }
+
   .gate-shake {
     animation: gate-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   }
@@ -252,7 +262,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .gate-in, .gate-shake { animation: none; }
+    .gate-in, .gate-shake, .heart-float { animation: none; }
     .gate-key { transition: none; }
   }
 }

@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { ArrowRight, Heart } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const TEASES = [
@@ -44,7 +44,23 @@ function Polaroid({
 
 const FACES = ["😏", "😎", "🙈", "😅", "🤭", "🫣"];
 
-export function WhoIsCuterModal({ onChosen }: { onChosen?: () => void }) {
+const FLOATING_HEARTS = [
+  { left: "8%", size: 18, dur: "7s", delay: "0s" },
+  { left: "22%", size: 12, dur: "9s", delay: "1.5s" },
+  { left: "38%", size: 20, dur: "8s", delay: "3s" },
+  { left: "56%", size: 14, dur: "7.5s", delay: "0.8s" },
+  { left: "72%", size: 22, dur: "9s", delay: "2.2s" },
+  { left: "88%", size: 13, dur: "8s", delay: "4s" },
+];
+
+export function WhoIsCuterModal({
+  onChosen,
+  onContinue,
+}: {
+  onChosen?: () => void;
+  onContinue?: () => void;
+}) {
+  const [note, setNote] = useState(false);
   const [pos, setPos] = useState<Pos>({ x: 0, y: 0 });
   const [tilt, setTilt] = useState(0);
   const [fleeing, setFleeing] = useState(false);
@@ -94,6 +110,13 @@ export function WhoIsCuterModal({ onChosen }: { onChosen?: () => void }) {
     if (fleeTimer.current) clearTimeout(fleeTimer.current);
     fleeTimer.current = setTimeout(() => setFleeing(false), 700);
   }, [moveRandom]);
+
+  // depois do "Eu sabia!", mostra o cantinho
+  useEffect(() => {
+    if (!chosen) return;
+    const timer = setTimeout(() => setNote(true), 2600);
+    return () => clearTimeout(timer);
+  }, [chosen]);
 
   // enquanto isso, anda sozinho pela tela fingindo que não é nada com ele
   useEffect(() => {
@@ -196,6 +219,52 @@ export function WhoIsCuterModal({ onChosen }: { onChosen?: () => void }) {
               {tease}
             </p>
           </>
+        ) : note ? (
+          <div className="gate-in relative flex w-full flex-col items-center overflow-hidden px-2 pb-1 pt-3">
+            <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+              {FLOATING_HEARTS.map((h, i) => (
+                <Heart
+                  key={i}
+                  className="heart-float absolute bottom-0 fill-primary/40 text-primary/40"
+                  style={
+                    {
+                      left: h.left,
+                      width: h.size,
+                      height: h.size,
+                      "--dur": h.dur,
+                      "--delay": h.delay,
+                    } as React.CSSProperties
+                  }
+                />
+              ))}
+            </div>
+
+            <div className="relative grid size-16 place-items-center rounded-full bg-primary/10">
+              <Heart className="size-8 fill-primary text-primary" aria-hidden="true" />
+            </div>
+
+            <h2
+              id="cuter-title"
+              className="font-hand relative mt-5 text-[clamp(2.1rem,6.4dvh,2.9rem)] font-bold leading-[1.05] text-primary"
+            >
+              Fiz este cantinho pensando em ti. <span className="not-italic">❤️</span>
+            </h2>
+
+            <span className="relative mt-4 h-px w-16 bg-primary/35" aria-hidden="true" />
+
+            <p className="relative mt-4 max-w-[17rem] text-[0.95rem] leading-relaxed text-foreground/75">
+              Não é perfeito, mas cada detalhe foi feito com carinho.
+            </p>
+
+            <button
+              type="button"
+              className="gate-key relative mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3 text-sm font-bold tracking-[0.18em]"
+              onClick={onContinue}
+            >
+              CONTINUAR
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </button>
+          </div>
         ) : (
           <div className="flex flex-col items-center">
             <h2
