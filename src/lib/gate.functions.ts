@@ -35,7 +35,7 @@ async function passwordsMatch(input: string, expected: string) {
   const expectedBytes = new Uint8Array(expectedDigest);
   let difference = 0;
   for (let index = 0; index < inputBytes.length; index += 1) {
-    difference |= inputBytes[index] ^ expectedBytes[index];
+    difference |= (inputBytes[index] ?? 0) ^ (expectedBytes[index] ?? 0);
   }
   return difference === 0;
 }
