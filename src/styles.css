@@ -64,6 +64,7 @@
   --color-input-surface: var(--input-surface);
   --color-success: var(--success);
   --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-hand: "Caveat", "Segoe Print", cursive;
   --font-sans: "Manrope", sans-serif;
   --shadow-polaroid: 0 24px 55px -24px color-mix(in oklab, var(--foreground) 28%, transparent), 0 4px 16px color-mix(in oklab, var(--primary) 10%, transparent);
   --shadow-soft: 0 12px 30px -14px color-mix(in oklab, var(--primary) 55%, transparent);
@@ -94,6 +95,11 @@
   --photo-muted: oklch(0.93 0.025 355);
   --input-surface: oklch(0.995 0.006 355 / 80%);
   --success: oklch(0.5 0.105 150);
+  --gate-top: oklch(0.975 0.022 355);
+  --gate-bottom: oklch(0.8 0.115 358);
+  --gate-key: oklch(0.86 0.075 355);
+  --gate-key-edge: oklch(0.74 0.1 356);
+  --gate-pill: oklch(0.34 0.05 350);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -154,5 +160,60 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     letter-spacing: 0;
+  }
+}
+
+
+@layer components {
+  .gate-bg {
+    background-image: linear-gradient(180deg, var(--gate-top) 0%, color-mix(in oklab, var(--gate-top) 40%, var(--gate-bottom)) 45%, var(--gate-bottom) 100%);
+  }
+
+  .gate-pill {
+    background-color: var(--gate-pill);
+    box-shadow: inset 0 2px 6px color-mix(in oklab, black 35%, transparent), 0 1px 0 color-mix(in oklab, white 55%, transparent);
+  }
+
+  .gate-key {
+    background-color: var(--gate-key);
+    color: oklch(0.38 0.09 352);
+    box-shadow: 0 4px 0 var(--gate-key-edge), 0 8px 14px -6px color-mix(in oklab, var(--gate-key-edge) 70%, transparent);
+    transition: transform 80ms ease, box-shadow 80ms ease, background-color 120ms ease;
+  }
+
+  .gate-key:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--gate-key-edge), 0 3px 6px -4px color-mix(in oklab, var(--gate-key-edge) 70%, transparent);
+  }
+
+  .gate-key:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  .gate-key-action {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: 0 4px 0 color-mix(in oklab, var(--primary) 70%, black), 0 8px 14px -6px color-mix(in oklab, var(--primary) 70%, transparent);
+  }
+
+  .gate-key-action:active {
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--primary) 70%, black);
+  }
+
+  .gate-shake {
+    animation: gate-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+
+  @keyframes gate-shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-6px); }
+    40%, 60% { transform: translateX(6px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gate-shake { animation: none; }
+    .gate-key { transition: none; }
   }
 }

@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, Eye, EyeOff, Heart, Image as ImageIcon, LockKeyhole } from "lucide-react";
-import { useState } from "react";
+import { Delete, Heart, LockKeyhole } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { unlockSite } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/")({
@@ -20,93 +19,203 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const MIN_DOTS = 6;
+const MAX_DIGITS = 12;
+const DIGIT_ROWS = [
+  ["1", "2", "3"],
+  ["4", "5", "6"],
+  ["7", "8", "9"],
+];
+
+type Status = "idle" | "loading" | "error" | "success";
+
 function Index() {
   const unlock = useServerFn(unlockSite);
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">("idle");
+  const [status, setStatus] = useState<Status>("idle");
+  const [shakeKey, setShakeKey] = useState(0);
+  const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!password.trim() || status === "loading") return;
+  useEffect(() => {
+    return () => {
+      if (clearTimer.current) clearTimeout(clearTimer.current);
+    };
+  }, []);
+
+  const addDigit = useCallback((digit: string) => {
+    setStatus((current) => (current === "loading" || current === "success" ? current : "idle"));
+    setPassword((current) => (current.length >= MAX_DIGITS ? current : current + digit));
+  }, []);
+
+  const removeDigit = useCallback(() => {
+    setStatus((current) => (current === "loading" || current === "success" ? current : "idle"));
+    setPassword((current) => current.slice(0, -1));
+  }, []);
+
+  const submit = useCallback(async () => {
+    if (!password || status === "loading" || status === "success") return;
     setStatus("loading");
 
     try {
       const result = await unlock({ data: { password } });
-      setStatus(result.ok ? "success" : "error");
+      if (result.ok) {
+        setStatus("success");
+        return;
+      }
     } catch {
-      setStatus("error");
+      // cai no estado de erro abaixo
     }
-  }
+
+    setStatus("error");
+    setShakeKey((key) => key + 1);
+    clearTimer.current = setTimeout(() => setPassword(""), 450);
+  }, [password, status, unlock]);
+
+  // teclado físico (computador): números, apagar e Enter
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (/^\d$/.test(event.key)) addDigit(event.key);
+      else if (event.key === "Backspace") removeDigit();
+      else if (event.key === "Enter") void submit();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [addDigit, removeDigit, submit]);
+
+  const locked = status === "loading" || status === "success";
+  const dotCount = Math.max(MIN_DOTS, password.length);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background px-6 py-10 text-foreground sm:py-14">
-      <Heart className="absolute left-[12%] top-[12%] size-3 rotate-[-12deg] fill-primary/25 text-primary/30" aria-hidden="true" />
-      <Heart className="absolute right-[15%] top-[24%] size-2.5 rotate-12 fill-primary/20 text-primary/25" aria-hidden="true" />
-      <Heart className="absolute bottom-[13%] left-[16%] size-2 fill-primary/15 text-primary/20" aria-hidden="true" />
+    <main className="gate-bg relative min-h-dvh overflow-x-hidden px-6 pb-12 pt-8 text-foreground">
+      <Heart
+        className="absolute left-[9%] top-[7%] size-3 rotate-[-12deg] fill-primary/25 text-primary/30"
+        aria-hidden="true"
+      />
+      <Heart
+        className="absolute right-[10%] top-[16%] size-2.5 rotate-12 fill-primary/20 text-primary/25"
+        aria-hidden="true"
+      />
+      <Heart
+        className="absolute bottom-[6%] right-[8%] size-2 fill-primary/20 text-primary/25"
+        aria-hidden="true"
+      />
 
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-sm flex-col items-center justify-center">
-        <div className="relative mb-9 w-[15.5rem] rotate-[-2deg] bg-polaroid p-3 pb-12 shadow-polaroid sm:w-[17rem]">
-          <div className="flex aspect-[4/5] items-center justify-center overflow-hidden bg-photo-muted">
-            <ImageIcon className="size-8 stroke-[1.25] text-muted-foreground/50" aria-label="Foto a adicionar" />
-          </div>
-          <Heart className="absolute bottom-4 right-5 size-4 rotate-6 fill-primary/30 text-primary/40" aria-hidden="true" />
-        </div>
+      <div className="mx-auto flex w-full max-w-xs flex-col items-center">
+        <Bow className="h-14 w-16 drop-shadow-sm" />
 
-        <section className="w-full text-center" aria-labelledby="gate-title">
-          <h1 id="gate-title" className="font-display text-3xl font-semibold leading-tight sm:text-4xl">
-            Antes de entrar... <span aria-hidden="true">👀</span>
+        <section className="mt-2 w-full text-center" aria-labelledby="gate-title">
+          <h1 id="gate-title" className="font-hand text-4xl font-bold leading-none text-primary">
+            Minha Senha
           </h1>
-          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            preciso ter certeza de que és tu.
-          </p>
+          <p className="mt-1.5 text-sm text-foreground/65">uma data especial para nós</p>
 
-          <form className="mt-8 text-left" onSubmit={handleSubmit}>
-            <label htmlFor="password" className="mb-2.5 flex items-center gap-2 text-sm font-medium">
-              <LockKeyhole className="size-4 text-primary" aria-hidden="true" />
-              Digita a senha
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                inputMode="numeric"
-                autoComplete="current-password"
-                maxLength={80}
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value);
-                  if (status !== "idle") setStatus("idle");
-                }}
-                className="h-13 w-full rounded-md border border-input bg-input-surface px-4 pr-12 text-base outline-none transition focus:border-primary focus:ring-4 focus:ring-ring/20"
-                aria-invalid={status === "error"}
-                aria-describedby="password-message"
-              />
-              <Button
+          <div
+            key={shakeKey}
+            className={`gate-pill mx-auto mt-5 flex h-12 w-full items-center gap-3 rounded-xl px-4 ${shakeKey > 0 && status === "error" ? "gate-shake" : ""}`}
+            role="group"
+            aria-label={`Senha: ${password.length} dígitos`}
+          >
+            <LockKeyhole className="size-4 shrink-0 text-white/70" aria-hidden="true" />
+            <div className="flex flex-1 items-center justify-center gap-2" aria-hidden="true">
+              {Array.from({ length: dotCount }, (_, index) => (
+                <span
+                  key={index}
+                  className={`size-2.5 rounded-full transition-colors ${index < password.length ? "bg-white" : "bg-white/25"}`}
+                />
+              ))}
+            </div>
+            <span className="size-4 shrink-0" aria-hidden="true" />
+          </div>
+
+          <div className="min-h-6 pt-2 text-sm" aria-live="polite">
+            {status === "error" && (
+              <p className="font-medium text-destructive">
+                Essa senha não parece certa. Tenta novamente.
+              </p>
+            )}
+            {status === "success" && <p className="font-medium text-success">É mesmo você. ♡</p>}
+          </div>
+
+          <div className="mx-auto mt-1 grid w-full max-w-[17rem] grid-cols-3 gap-x-4 gap-y-3">
+            {DIGIT_ROWS.flat().map((digit) => (
+              <button
+                key={digit}
                 type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-                onClick={() => setShowPassword((current) => !current)}
-                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                className="gate-key h-11 rounded-xl text-xl font-semibold disabled:opacity-60"
+                onClick={() => addDigit(digit)}
+                disabled={locked}
+                aria-label={digit}
               >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </Button>
-            </div>
+                {digit}
+              </button>
+            ))}
 
-            <div id="password-message" className="min-h-7 pt-2 text-sm" aria-live="polite">
-              {status === "error" && <p className="text-destructive">Essa senha não parece certa. Tenta novamente.</p>}
-              {status === "success" && <p className="font-medium text-success">É mesmo você. ♡</p>}
-            </div>
-
-            <Button type="submit" variant="romantic" size="wide" disabled={!password.trim() || status === "loading"}>
-              {status === "loading" ? "Só um instante..." : status === "success" ? "Senha confirmada" : "Entrar"}
-              {status !== "loading" && <ArrowRight aria-hidden="true" />}
-            </Button>
-          </form>
+            <button
+              type="button"
+              className="gate-key gate-key-action grid h-11 place-items-center rounded-xl disabled:opacity-60"
+              onClick={() => void submit()}
+              disabled={!password || locked}
+              aria-label="Entrar"
+            >
+              <Heart className="size-5 fill-current" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="gate-key h-11 rounded-xl text-xl font-semibold disabled:opacity-60"
+              onClick={() => addDigit("0")}
+              disabled={locked}
+              aria-label="0"
+            >
+              0
+            </button>
+            <button
+              type="button"
+              className="gate-key grid h-11 place-items-center rounded-xl disabled:opacity-60"
+              onClick={removeDigit}
+              disabled={!password || locked}
+              aria-label="Apagar"
+            >
+              <Delete className="size-5" aria-hidden="true" />
+            </button>
+          </div>
         </section>
+
+        <figure className="relative mt-8 w-[12rem] rotate-[-3deg] bg-polaroid p-2.5 pb-11 shadow-polaroid sm:w-[13rem]">
+          <img
+            src="/foto.jpg"
+            alt="A nossa foto"
+            width={900}
+            height={1125}
+            className="aspect-[4/5] w-full object-cover"
+          />
+          <figcaption className="absolute inset-x-0 bottom-2.5 flex items-center justify-center gap-1.5 font-hand text-xl leading-none text-foreground/75">
+            Eu te amo
+            <Heart className="size-3.5 fill-transparent text-primary/70" aria-hidden="true" />
+          </figcaption>
+        </figure>
       </div>
     </main>
+  );
+}
+
+function Bow({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 56" className={className} aria-hidden="true">
+      <defs>
+        <linearGradient id="bow-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="oklch(0.82 0.12 352)" />
+          <stop offset="1" stopColor="oklch(0.66 0.17 355)" />
+        </linearGradient>
+      </defs>
+      <path d="M30 28 C20 6 2 6 3 22 C4 36 18 42 30 30 Z" fill="url(#bow-grad)" />
+      <path d="M34 28 C44 6 62 6 61 22 C60 36 46 42 34 30 Z" fill="url(#bow-grad)" />
+      <path d="M29 33 L19 52 L28 47 L31 55 L33 35 Z" fill="url(#bow-grad)" opacity="0.9" />
+      <path d="M35 33 L45 52 L36 47 L33 55 L31 35 Z" fill="url(#bow-grad)" opacity="0.9" />
+      <path d="M12 16 C16 14 22 18 26 26" fill="none" stroke="white" strokeOpacity="0.45" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M52 16 C48 14 42 18 38 26" fill="none" stroke="white" strokeOpacity="0.45" strokeWidth="1.6" strokeLinecap="round" />
+      <ellipse cx="32" cy="29" rx="6" ry="7" fill="oklch(0.6 0.18 355)" />
+      <ellipse cx="30.5" cy="26.5" rx="2" ry="3" fill="white" fillOpacity="0.35" />
+    </svg>
   );
 }
