@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { redirect } from "@tanstack/react-router";
 
 type GateSession = { unlocked?: boolean };
 
@@ -54,3 +55,58 @@ export const unlockSite = createServerFn({ method: "POST" })
     await session.update({ unlocked: true });
     return { ok: true as const };
   });
+
+export const getLoveLetter = createServerFn({ method: "GET" }).handler(async () => {
+  const session = await useSession<GateSession>(getSessionConfig());
+  if (!session.data.unlocked) throw redirect({ to: "/" });
+  const [portrait, smile, garden] = await Promise.all([
+    import("@/assets/helena-retrato.jpg.asset.json"),
+    import("@/assets/helena-sorriso.jpg.asset.json"),
+    import("@/assets/helena-jardim.jpg.asset.json"),
+  ]);
+  return {
+    photos: [portrait.default.url, smile.default.url, garden.default.url],
+    poem: `No dia que te conheci,
+o mundo não fez silêncio.
+O sol nasceu,
+as pessoas correram,
+os carros atravessaram as ruas
+e a vida continuou sem saber
+que alguém estava prestes a se tornar
+uma das minhas histórias favoritas.
+
+Você chegou sem chegar.
+Primeiro foi uma voz,
+depois uma conversa,
+depois aquele sorriso que apareceu em mim
+sem que eu tivesse pedido.
+
+Ainda não sabia o teu nome
+dentro do meu coração.
+Você era só alguém. 8
+
+E talvez seja assim
+que as pessoas mais importantes chegam:
+sem avisar que vão ficar.
+
+Eu não sabia que aquela conversa
+seria lembrança.
+Não sabia que a tua maneira de falar
+ficaria presa em algum lugar da minha memória.
+Não sabia que, entre tantas pessoas
+que o mundo colocou no meu caminho,
+eu encontraria você.
+
+Naquele dia,
+nada mudou lá fora.
+Mas alguma coisa mudou em mim.
+
+E hoje penso:
+talvez alguns encontros
+não aconteçam para mudar o mundo.
+Apenas para mudar
+o nosso mundo.
+
+E você mudou o meu.`,
+  };
+});

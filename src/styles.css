@@ -63,6 +63,10 @@
   --color-photo-muted: var(--photo-muted);
   --color-input-surface: var(--input-surface);
   --color-success: var(--success);
+  --color-letter-night: var(--letter-night);
+  --color-letter-gold: var(--letter-gold);
+  --color-letter-paper: var(--letter-paper);
+  --color-letter-ink: var(--letter-ink);
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-hand: "Caveat", "Segoe Print", cursive;
   --font-sans: "Manrope", sans-serif;
@@ -72,6 +76,12 @@
 
 :root {
   --radius: 0.5rem;
+  --letter-night: oklch(0.17 0.013 250);
+  --letter-gold: oklch(0.83 0.075 87);
+  --letter-paper: oklch(0.96 0.025 10);
+  --letter-ink: oklch(0.32 0.03 10);
+  --letter-edge: oklch(0.79 0.055 10);
+  --letter-shadow: 0 18px 38px oklch(0 0 0 / 30%);
   --background: oklch(0.975 0.018 355);
   --foreground: oklch(0.27 0.035 355);
   --card: oklch(1 0 0);
@@ -165,6 +175,27 @@
 
 
 @layer components {
+  .letter-scene { background: var(--letter-night); overflow-x: clip; }
+  .letter-layout { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 44px; align-items: start; }
+  .letter-paper {
+    background: var(--letter-paper);
+    box-shadow: var(--letter-shadow), inset 0 0 70px color-mix(in oklab, var(--letter-edge) 20%, transparent);
+    border: 1px solid var(--letter-edge);
+    transform: rotate(-0.7deg);
+  }
+  .letter-fold { position: absolute; top: -35px; left: 7%; right: 7%; height: 90px; background: var(--letter-edge); clip-path: polygon(50% 0, 100% 100%, 0 100%); z-index: -1; }
+  .letter-photos { display: flex; flex-direction: column; gap: 42px; padding-top: 15px; }
+  .letter-polaroid { background: var(--polaroid); padding: 9px 9px 12px; box-shadow: var(--letter-shadow); }
+  .letter-photo-0 { transform: rotate(7deg); }
+  .letter-photo-1 { transform: rotate(-5deg); }
+  .letter-photo-2 { transform: rotate(4deg); }
+  @media (max-width: 640px) {
+    .letter-layout { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+    .letter-photos { grid-row: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; padding: 0 3px 12px; }
+    .letter-polaroid { padding: 5px 5px 8px; }
+    .letter-polaroid figcaption { font-size: 15px; margin-top: 8px; }
+    .letter-paper { transform: none; }
+  }
   body:has(.gate-bg) {
     overflow: hidden;
     overscroll-behavior: none;

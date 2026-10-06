@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep the shared site password in a server-only environment variable and persist unlock state in an encrypted session, because private content must never ship to locked visitors.
+- The letter route loads its poem and photo references from a session-gated server function, so locked visitors receive neither its text nor its photo references.
