@@ -1,15 +1,6 @@
 import { ArrowRight, Heart } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const TEASES = [
-  "Opa! O Jesus fugiu 🏃💨",
-  "Ele tem vergonha, coitado 🙈",
-  "Quase! Mas esse botão tem vida própria 😅",
-  "O Jesus pediu para dizer que hoje não está disponível 🚫",
-  "Insistente… mas só a Helena aceita cliques aqui 🩷",
-  "Já desisti de o defender, clica na Helena 😂",
-];
-
 type Pos = { x: number; y: number };
 
 function Polaroid({
@@ -68,11 +59,7 @@ const POEM: string[][] = [
     "gosto das pequenas coisas em ti",
     "que talvez nem saibas que eu reparo.",
   ],
-  [
-    "E olha que eu tentei ser sério",
-    "enquanto escrevia isto...",
-    "mas não dá. 😂",
-  ],
+  ["E olha que eu tentei ser sério", "enquanto escrevia isto...", "mas não dá. 😂"],
   [
     "Porque falar de ti",
     "é tipo tentar esconder um sorriso:",
@@ -86,10 +73,7 @@ const POEM: string[][] = [
     "Talvez um bocadinho mais",
     "do que eu deveria admitir. 👀",
   ],
-  [
-    "Mas fica tranquila...",
-    "este poema não conta para ninguém. 🤫😂❤️",
-  ],
+  ["Mas fica tranquila...", "este poema não conta para ninguém. 🤫😂❤️"],
 ];
 
 const FACES = ["😏", "😎", "🙈", "😅", "🤭", "🫣"];
@@ -169,17 +153,14 @@ export function WhoIsCuterModal({
     return () => clearTimeout(timer);
   }, [chosen]);
 
-  // enquanto isso, anda sozinho pela tela fingindo que não é nada com ele
+  // limpa o timer ao sair
   useEffect(() => {
-    if (chosen) return;
-    const interval = setInterval(() => moveRandom(60), 1400);
     return () => {
-      clearInterval(interval);
       if (fleeTimer.current) clearTimeout(fleeTimer.current);
     };
-  }, [chosen, moveRandom]);
+  }, []);
 
-  const tease = dodges > 0 ? TEASES[(dodges - 1) % TEASES.length] : null;
+  const tease = dodges > 0;
 
   return (
     <div
@@ -196,7 +177,10 @@ export function WhoIsCuterModal({
 
         {poemStage === "intro" ? (
           <div className="gate-in flex w-full flex-col items-center px-2 pb-1 pt-3">
-            <div className="grid size-16 place-items-center rounded-full bg-primary/10 text-3xl" aria-hidden="true">
+            <div
+              className="grid size-16 place-items-center rounded-full bg-primary/10 text-3xl"
+              aria-hidden="true"
+            >
               📜
             </div>
             <h2
@@ -273,12 +257,7 @@ export function WhoIsCuterModal({
             </p>
 
             <div className="mt-5 flex items-start justify-center gap-3">
-              <Polaroid
-                src="/jesus.jpg"
-                alt="Foto do Jesus"
-                name="Jesus"
-                tilt="rotate-[-4deg]"
-              />
+              <Polaroid src="/jesus.jpg" alt="Foto do Jesus" name="Jesus" tilt="rotate-[-4deg]" />
               <Polaroid
                 src="/helena.jpg"
                 alt="Foto da Helena"
@@ -298,22 +277,16 @@ export function WhoIsCuterModal({
                     ? "transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1)"
                     : "transform 1100ms cubic-bezier(0.45, 0, 0.25, 1)",
                 }}
-                onPointerEnter={dodge}
                 onPointerDown={(event) => {
                   event.preventDefault();
                   dodge();
                 }}
-                onTouchStart={(event) => {
-                  event.preventDefault();
-                  dodge();
-                }}
-                onFocus={dodge}
                 onClick={(event) => {
                   event.preventDefault();
                   dodge();
                 }}
               >
-                Jesus {fleeing ? "🏃💨" : FACES[face]}
+                Jesus{dodges > 0 ? ` ${fleeing ? "🏃💨" : FACES[face]}` : ""}
               </button>
 
               <button
@@ -328,12 +301,18 @@ export function WhoIsCuterModal({
               </button>
             </div>
 
-            <p
-              className="mt-3 h-10 text-xs font-semibold text-primary sm:text-sm"
-              aria-live="polite"
-            >
-              {tease}
-            </p>
+            <div className="mt-3 min-h-[3.75rem] px-2" aria-live="polite">
+              {tease && (
+                <div className="gate-in" key={dodges}>
+                  <p className="text-sm font-bold text-primary">Escolhe outra pessoa 😳</p>
+                  <p className="mt-0.5 text-xs leading-snug text-foreground/70">
+                    Se disseres que o Jesus é fofo, ele fica sem jeito.
+                    <br />
+                    Escolhe a Helena 🩷
+                  </p>
+                </div>
+              )}
+            </div>
           </>
         ) : note ? (
           <div className="gate-in relative flex w-full flex-col items-center overflow-hidden px-2 pb-1 pt-3">
