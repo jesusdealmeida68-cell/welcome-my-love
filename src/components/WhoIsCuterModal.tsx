@@ -44,28 +44,51 @@ function Polaroid({
 
 const POEM: string[][] = [
   [
-    "Isto é só um poema,",
-    "umas palavras arrumadas",
-    "numa fila, ao pé uma da outra.",
+    "Eu podia escrever um poema bonito,",
+    "daqueles que parecem saídos de um livro...",
+    "mas, sinceramente,",
+    "a culpa é tua. 😂",
   ],
   [
-    "Não tem nenhum feitiço,",
-    "nenhuma armadilha,",
-    "nenhum truque escondido.",
+    "Porque quando penso em ti,",
+    "começo a sorrir sem perceber,",
+    "esqueço o que ia escrever",
+    "e fico aqui... a pensar em ti. 🤦🏽‍♂️❤️",
   ],
   [
-    "Mas se o teu sorriso",
-    "chegar antes de eu acabar,",
-    "a culpa é das palavras,",
-    "que nunca sabem ficar quietas",
-    "quando falam de ti.",
+    "Tu tens esse jeito estranho",
+    "de aparecer nos meus pensamentos",
+    "sem sequer bater à porta.",
+    "E o pior?",
+    "Eu nem quero que vás embora. 😌",
   ],
   [
-    "E se, por acaso,",
-    "no fim da última linha",
-    "te der um calor no peito…",
-    "foi só o poema.",
-    "Eu não tenho nada com isso. 😌",
+    "Gosto do teu sorriso,",
+    "gosto do teu jeito,",
+    "gosto das pequenas coisas em ti",
+    "que talvez nem saibas que eu reparo.",
+  ],
+  [
+    "E olha que eu tentei ser sério",
+    "enquanto escrevia isto...",
+    "mas não dá. 😂",
+  ],
+  [
+    "Porque falar de ti",
+    "é tipo tentar esconder um sorriso:",
+    "quanto mais eu tento,",
+    "mais óbvio fica.",
+  ],
+  [
+    "Então pronto...",
+    "não vou complicar.",
+    "Gosto de ti. ❤️",
+    "Talvez um bocadinho mais",
+    "do que eu deveria admitir. 👀",
+  ],
+  [
+    "Mas fica tranquila...",
+    "este poema não conta para ninguém. 🤫😂❤️",
   ],
 ];
 
@@ -213,7 +236,7 @@ export function WhoIsCuterModal({
                 return POEM.map((stanza, si) => (
                   <p key={si} className="font-hand text-[1.35rem] leading-snug text-foreground/85">
                     {stanza.map((line) => {
-                      const delay = 500 + index * 380;
+                      const delay = 500 + index * 320;
                       index += 1;
                       return (
                         <span
@@ -232,7 +255,7 @@ export function WhoIsCuterModal({
 
             <Heart
               className="gate-in mt-6 size-5 fill-primary text-primary"
-              style={{ animationDelay: `${500 + POEM.flat().length * 380 + 300}ms` }}
+              style={{ animationDelay: `${500 + POEM.flat().length * 320 + 300}ms` }}
               aria-hidden="true"
             />
           </article>
