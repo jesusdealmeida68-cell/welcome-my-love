@@ -42,6 +42,33 @@ function Polaroid({
   );
 }
 
+const POEM: string[][] = [
+  [
+    "Isto é só um poema,",
+    "umas palavras arrumadas",
+    "numa fila, ao pé uma da outra.",
+  ],
+  [
+    "Não tem nenhum feitiço,",
+    "nenhuma armadilha,",
+    "nenhum truque escondido.",
+  ],
+  [
+    "Mas se o teu sorriso",
+    "chegar antes de eu acabar,",
+    "a culpa é das palavras,",
+    "que nunca sabem ficar quietas",
+    "quando falam de ti.",
+  ],
+  [
+    "E se, por acaso,",
+    "no fim da última linha",
+    "te der um calor no peito…",
+    "foi só o poema.",
+    "Eu não tenho nada com isso. 😌",
+  ],
+];
+
 const FACES = ["😏", "😎", "🙈", "😅", "🤭", "🫣"];
 
 const FLOATING_HEARTS = [
@@ -61,6 +88,7 @@ export function WhoIsCuterModal({
   onContinue?: () => void;
 }) {
   const [note, setNote] = useState(false);
+  const [poemStage, setPoemStage] = useState<"intro" | "poem" | null>(null);
   const [pos, setPos] = useState<Pos>({ x: 0, y: 0 });
   const [tilt, setTilt] = useState(0);
   const [fleeing, setFleeing] = useState(false);
@@ -143,7 +171,72 @@ export function WhoIsCuterModal({
           aria-hidden="true"
         />
 
-        {!chosen ? (
+        {poemStage === "intro" ? (
+          <div className="gate-in flex w-full flex-col items-center px-2 pb-1 pt-3">
+            <div className="grid size-16 place-items-center rounded-full bg-primary/10 text-3xl" aria-hidden="true">
+              📜
+            </div>
+            <h2
+              id="cuter-title"
+              className="font-hand mt-5 text-[clamp(2.1rem,6.4dvh,2.9rem)] font-bold leading-[1.05] text-primary"
+            >
+              É só um poema.
+            </h2>
+            <p className="mt-3 max-w-[16rem] text-[0.95rem] leading-relaxed text-foreground/75">
+              Não vais te apaixonar, tá, meu bem? 😌
+            </p>
+            <button
+              type="button"
+              className="gate-key mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3 text-sm font-bold tracking-[0.18em]"
+              onClick={() => setPoemStage("poem")}
+            >
+              LER O POEMA
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </button>
+          </div>
+        ) : poemStage === "poem" ? (
+          <article
+            className="flex max-h-[calc(100dvh-4rem)] w-full flex-col items-center overflow-y-auto px-3 pb-2 pt-2"
+            aria-labelledby="cuter-title"
+          >
+            <h2
+              id="cuter-title"
+              className="font-hand gate-in text-[clamp(2rem,6dvh,2.6rem)] font-bold leading-none text-primary"
+            >
+              Só um poema
+            </h2>
+            <span className="mt-3 h-px w-14 bg-primary/35" aria-hidden="true" />
+
+            <div className="mt-5 space-y-5">
+              {(() => {
+                let index = 0;
+                return POEM.map((stanza, si) => (
+                  <p key={si} className="font-hand text-[1.35rem] leading-snug text-foreground/85">
+                    {stanza.map((line) => {
+                      const delay = 500 + index * 380;
+                      index += 1;
+                      return (
+                        <span
+                          key={line}
+                          className="gate-in block"
+                          style={{ animationDelay: `${delay}ms` }}
+                        >
+                          {line}
+                        </span>
+                      );
+                    })}
+                  </p>
+                ));
+              })()}
+            </div>
+
+            <Heart
+              className="gate-in mt-6 size-5 fill-primary text-primary"
+              style={{ animationDelay: `${500 + POEM.flat().length * 380 + 300}ms` }}
+              aria-hidden="true"
+            />
+          </article>
+        ) : !chosen ? (
           <>
             <h2
               id="cuter-title"
@@ -259,7 +352,10 @@ export function WhoIsCuterModal({
             <button
               type="button"
               className="gate-key relative mt-7 inline-flex items-center gap-2 rounded-2xl px-7 py-3 text-sm font-bold tracking-[0.18em]"
-              onClick={onContinue}
+              onClick={() => {
+                setPoemStage("intro");
+                onContinue?.();
+              }}
             >
               CONTINUAR
               <ArrowRight className="size-4" aria-hidden="true" />
