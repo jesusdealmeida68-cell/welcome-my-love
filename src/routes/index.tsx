@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Delete, Heart, LockKeyhole } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { SplashScreen } from "@/components/SplashScreen";
 import { WhoIsCuterModal } from "@/components/WhoIsCuterModal";
 import { unlockSite } from "@/lib/gate.functions";
 
@@ -37,6 +38,8 @@ function Index() {
   const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearing = useRef(false);
   const [showModal, setShowModal] = useState(false);
+  const [splash, setSplash] = useState(true);
+  const endSplash = useCallback(() => setSplash(false), []);
 
   useEffect(() => {
     return () => {
@@ -205,6 +208,7 @@ function Index() {
         </section>
       </div>
       {showModal && <WhoIsCuterModal />}
+      {splash && <SplashScreen onDone={endSplash} />}
     </main>
   );
 }
