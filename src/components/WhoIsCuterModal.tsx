@@ -213,7 +213,7 @@ export function WhoIsCuterModal({ onChosen }: { onChosen?: () => void }) {
               />
             </div>
             <p className="mt-4 max-w-[17rem] text-sm text-foreground/80">
-              Resposta oficial e sem recurso: a Helena. Bem-vinda, meu amor ♡
+              Resposta oficial e sem recurso: a Helena. Bem-vinda, pessoa maravilhosa ♡
             </p>
           </div>
         )}
